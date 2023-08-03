@@ -26,6 +26,28 @@ export class AuthenticationService {
     }
 
   }
+  //TODO: TO OPTIMIZE
+
+  async refreshToken(tokenData: string): Promise<any> {
+    const secret = 'mysecret';
+    const decoded = this.jwtService.verify(tokenData, {secret: secret});
+
+    // Get user id from decoded token 
+    const emailDecoded = decoded.email; 
+    const passDecoded = decoded.password; 
+
+    const user = await this.userService.getByEmail(emailDecoded);
+    const validatedPass = await this.validatePassword(passDecoded, user.password);
+
+    if (validatedPass === false) {
+      throw new HttpException('Invalid Credentials', HttpStatus.BAD_REQUEST);
+    }
+    const payload = { username: user.email, password: user.password };
+    const newTokenRefreshed = this.sign(payload, secret);
+    return {
+      refreshToken: newTokenRefreshed,
+    }
+  }
 
   async validatePassword(password: string, hashedPassword: string) {
 
@@ -44,24 +66,5 @@ export class AuthenticationService {
     return this.jwtService.sign(payload, {
       secret: secret,
     });
-  }
-  create(createAuthenticationDto: CreateAuthenticationDto) {
-    return 'This action adds a new authentication';
-  }
-
-  findAll() {
-    return `This action returns all authentication`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} authentication`;
-  }
-
-  update(id: number, updateAuthenticationDto: UpdateAuthenticationDto) {
-    return `This action updates a #${id} authentication`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} authentication`;
   }
 }

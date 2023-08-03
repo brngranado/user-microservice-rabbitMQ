@@ -10,17 +10,11 @@ import {
   MessagePattern,
   Payload
 } from '@nestjs/microservices';
+import { RefreshTokenDto } from './dto/refresh-token.dto';
 
 @Controller()
 export class AuthenticationController {
   constructor(private readonly authenticationService: AuthenticationService) {}
-
-  @MessagePattern('createAuthentication')
-  create(@Payload() createAuthenticationDto: CreateAuthenticationDto) {
-    return this.authenticationService.create(createAuthenticationDto);
-  }
-
-  //TODO: test with postman microservices
 
   // @UseGuards(AuthGuard('jwt'))
   @MessagePattern('login')
@@ -38,24 +32,18 @@ export class AuthenticationController {
 
   }
 
+  @MessagePattern('refreshToken')
+  async refreshToken(@Payload() refreshTokenDto: RefreshTokenDto, @Ctx() context: RmqContext) {
+    const channel = context.getChannelRef();
+    const originalMsg = context.getMessage();
+    const tokenRefreshed = await this.authenticationService.refreshToken(refreshTokenDto.tokenData);
+    channel.sendToQueue(
+      originalMsg.properties.replyTo,
+      Buffer.from(JSON.stringify(tokenRefreshed)),
+      {
+        correlationId: originalMsg.properties.correlationId,
+      },
+    );
 
-  @MessagePattern('findAllAuthentication')
-  findAll() {
-    return this.authenticationService.findAll();
-  }
-
-  @MessagePattern('findOneAuthentication')
-  findOne(@Payload() id: number) {
-    return this.authenticationService.findOne(id);
-  }
-
-  @MessagePattern('updateAuthentication')
-  update(@Payload() updateAuthenticationDto: UpdateAuthenticationDto) {
-    return this.authenticationService.update(updateAuthenticationDto.id, updateAuthenticationDto);
-  }
-
-  @MessagePattern('removeAuthentication')
-  remove(@Payload() id: number) {
-    return this.authenticationService.remove(id);
   }
 }
