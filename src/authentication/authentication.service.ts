@@ -26,6 +26,11 @@ export class AuthenticationService {
     }
 
   }
+  validateToken(token: string) {
+    const secret = 'mysecret';
+    return this.jwtService.verify(token, {secret: secret});
+  }
+
   //TODO: TO OPTIMIZE
 
   async refreshToken(tokenData: string): Promise<any> {

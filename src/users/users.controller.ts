@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   Inject,
+  UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -18,6 +19,8 @@ import {
   Payload,
   RmqContext,
 } from '@nestjs/microservices';
+import { AuthGuard } from '@nestjs/passport';
+import { AuthUserGuard } from './authuser/authuser.guard';
 
 @Controller('users')
 export class UsersController {
@@ -43,14 +46,26 @@ export class UsersController {
     );
   }
 
+  @UseGuards(AuthUserGuard)
+  @MessagePattern('find_users')
+  findAll(@Payload() data: any[], @Ctx() context: RmqContext) {
+    const channel = context.getChannelRef();
+    const originalMsg = context.getMessage();
+    const usersTotals = this.usersService.findAll();
+    channel.sendToQueue(
+      originalMsg.properties.replyTo,
+      Buffer.from(JSON.stringify(usersTotals)),
+      {
+        correlationId: originalMsg.properties.correlationId,
+      },
+    );
+  }
+
+  
+
   @Post()
   create(@Body() createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
-  }
-
-  @Get()
-  findAll() {
-    return this.usersService.findAll();
   }
 
   @Get(':id')

@@ -1,8 +1,13 @@
-import { Module } from '@nestjs/common';
-import { UsersModule } from './users/users.module';
-import { AuthenticationModule } from './authentication/authentication.module';
+import {Module} from '@nestjs/common';
+import {UsersModule} from './users/users.module';
+import {AuthenticationModule} from './authentication/authentication.module';
+import { PassportModule } from '@nestjs/passport';
 
 @Module({
-  imports: [UsersModule, AuthenticationModule],
+    imports: [
+      PassportModule.register({ defaultStrategy: 'jwt' }),
+      UsersModule,
+      AuthenticationModule
+    ]
 })
 export class AppModule {}

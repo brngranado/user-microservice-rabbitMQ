@@ -9,7 +9,28 @@ export class UsersService {
   }
 
   findAll() {
-    return `This action returns all users`;
+    return  [
+      {
+      name: 'Bryan Granado',
+      ci: '12345678',
+      phone: '12345678',
+     },
+     {
+      name: 'José Rodríguez',
+      ci: '123456789',
+      phone: '1234567834',
+     },
+     {
+      name: 'Juan Pérez',
+      ci: '123456734',
+      phone: '1234567812',
+     },
+     {
+      name: 'Irina GUilarte',
+      ci: '14534453',
+      phone: '3444347812',
+     }
+  ];
   }
 
   findOne(id: number) {
