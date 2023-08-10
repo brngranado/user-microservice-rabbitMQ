@@ -4,36 +4,40 @@ import { Observable } from 'rxjs';
 import { AuthenticationService } from 'src/authentication/authentication.service';
 import { UsersService } from '../users.service';
 import { Reflector } from '@nestjs/core';
-
+import { ClientProxy, RmqContext } from '@nestjs/microservices';
 @Injectable()
 export class AuthUserGuard extends AuthGuard('jwt') implements CanActivate {
   
   constructor(
     private reflector: Reflector,
     private readonly authenticationService: AuthenticationService, 
-    private readonly userService: UsersService
+    private readonly userService: UsersService,
     ) {
     super();
   }
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    // const token = this.reflector.getAllAndOverride<string>(
-    //   'token',
-    //   [context.getHandler(), context.getClass()],
-    // );
-    //TODO: follow here =)
-    const token = context.switchToHttp().getRequest().headers['Authorization']; 
-    console.log(token);
-    const validate = this.authenticationService.validateToken(token);
-    const emailDecoded = validate.email; 
-    const passDecoded = validate.password; 
+    const rpcContext = context.switchToRpc();
+    const rmqContext = rpcContext.getContext<RmqContext>();
+    const message = rmqContext.getMessage();
+    const headers = message.properties.headers;
 
-    const user =  await this.userService.getByEmail(emailDecoded);
-    const validatedPass = this.authenticationService.validatePassword(passDecoded, user.password);
-    const isValid = user && validatedPass ? true : false;
+    console.log('en el guard', headers);
+    // const authHeader = ctx.getContext().headers['authorization'];
+    //TODO: follow here =)
+    // const token = context.switchToHttp().getRequest().headers['Authorization']; 
+
+    // console.log('TOKEN HEADER',authHeader);
+    // const validate = this.authenticationService.validateToken(req);
+    // const emailDecoded = validate.email; 
+    // const passDecoded = validate.password; 
+
+    // const user =  await this.userService.getByEmail(emailDecoded);
+    // const validatedPass = this.authenticationService.validatePassword(passDecoded, user.password);
+    // const isValid = user && validatedPass ? true : false;
   
-    if (isValid === false) {
-      throw new UnauthorizedException(); 
-    }
-    return true;
+    // if (isValid === false) {
+    //   throw new UnauthorizedException(); 
+    // }
+    return false;
   }
 }

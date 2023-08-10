@@ -21,6 +21,7 @@ import {
 } from '@nestjs/microservices';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthUserGuard } from './authuser/authuser.guard';
+import { UserDecorator } from './authuser/user-decorator.decorator';
 
 @Controller('users')
 export class UsersController {
@@ -45,6 +46,7 @@ export class UsersController {
       },
     );
   }
+
 
   @UseGuards(AuthUserGuard)
   @MessagePattern('find_users')
