@@ -20,13 +20,11 @@ import {
   RmqContext,
 } from '@nestjs/microservices';
 import { AuthGuard } from '@nestjs/passport';
-import { AuthUserGuard } from './authuser/authuser.guard';
-import { UserDecorator } from './authuser/user-decorator.decorator';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
-
+  
   @MessagePattern('users_event')
   handleUsersEvent(@Payload() data: any[], @Ctx() context: RmqContext) {
     const channel = context.getChannelRef();
@@ -47,8 +45,6 @@ export class UsersController {
     );
   }
 
-
-  @UseGuards(AuthUserGuard)
   @MessagePattern('find_users')
   findAll(@Payload() data: any[], @Ctx() context: RmqContext) {
     const channel = context.getChannelRef();
@@ -61,27 +57,5 @@ export class UsersController {
         correlationId: originalMsg.properties.correlationId,
       },
     );
-  }
-
-  
-
-  @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.usersService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(+id, updateUserDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.usersService.remove(+id);
   }
 }

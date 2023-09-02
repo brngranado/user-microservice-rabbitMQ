@@ -44,11 +44,4 @@ export class UsersService {
   remove(id: number) {
     return `This action removes a #${id} user`;
   }
-
-  async getByEmail(email: string) {
-    return {
-      email,
-      password: '123456',
-    }
-  }
 }
