@@ -21,7 +21,7 @@ import {
 } from '@nestjs/microservices';
 import { AuthGuard } from '@nestjs/passport';
 
-@Controller('users')
+@Controller()
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
   
